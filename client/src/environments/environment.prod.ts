@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://journhive.up.railway.app/api'  // Railway backend URL
+  apiUrl: 'https://journhive.up.railway.app'  // Railway backend URL (service appends /api/...)
 };

@@ -1,2 +1,21 @@
-.vercel
+cd "/Users/Vyshnavi Deepthisree Sudarsanakumar/Documents/Projects/journhive"
+
+cat > .gitignore <<'EOF'
+# dependencies
+node_modules/
+
+# build output
+dist/
+.angular/
+
+# environment / secrets
+.env
+.env.local
 .env*.local
+.vercel
+
+# editor / OS junk
+.vscode/
+.DS_Store
+EOF
+

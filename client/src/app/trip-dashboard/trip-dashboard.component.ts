@@ -75,7 +75,7 @@ export class TripDashboardComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#4a6cf7',
+      confirmButtonColor: '#0a1c38',
       cancelButtonColor: '#f28b82'
     }).then((result: any) => {
       if (result.isConfirmed) {

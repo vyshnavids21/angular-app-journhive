@@ -8,9 +8,13 @@ const mongoose = require('mongoose');
 const path = require('path');
 const User = require('./models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const auth = require('./middleware/auth');
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
+const crypto = require('crypto');
+const { sendResetEmail } = require('./utils/mailer');
 
 const app = express();
 const PORT = process.env.PORT || 3200;
@@ -51,7 +55,7 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '200mb' }));
 app.use(express.json({ limit: '200mb' }));
 
-app.post('/api/trips', upload.single('coverPhoto'), async (req, res) => {
+app.post('/api/trips', auth, upload.single('coverPhoto'), async (req, res) => {
   try {
     const coverPhotoPath = req.file ? req.file.path : null;
 
@@ -70,7 +74,7 @@ app.post('/api/trips', upload.single('coverPhoto'), async (req, res) => {
   }
 });
 
-app.post('/api/posts', upload.single('image'), async (req, res) => {
+app.post('/api/posts', auth, upload.single('image'), async (req, res) => {
   try {
     const imagePath = req.file ? req.file.path : null;
 
@@ -92,7 +96,7 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
   }
 });
 
-app.get('/api/posts/creator/:creatorId', async (req, res) => {
+app.get('/api/posts/creator/:creatorId', auth, async (req, res) => {
   try {
     const { creatorId } = req.params;
     const documents = await Post.find({ creatorId });
@@ -113,7 +117,7 @@ app.get('/api/posts/creator/:creatorId', async (req, res) => {
   }
 });
 
-app.get('/api/posts/trip/:tripId', async (req, res) => { //fetching posts by tripId on clicking view details from trip dashboard
+app.get('/api/posts/trip/:tripId', auth, async (req, res) => { //fetching posts by tripId on clicking view details from trip dashboard
   try {
     const { tripId } = req.params;
     const documents = await Post.find({ tripId });
@@ -134,7 +138,7 @@ app.get('/api/posts/trip/:tripId', async (req, res) => { //fetching posts by tri
   }
 });
 
-app.get('/api/trips/creator/:creatorId', async (req, res) => {
+app.get('/api/trips/creator/:creatorId', auth, async (req, res) => {
   try {
     const { creatorId } = req.params;
     const fetchedTrips = await Trip.find({ creatorId });
@@ -145,7 +149,7 @@ app.get('/api/trips/creator/:creatorId', async (req, res) => {
   }
 });
 
-app.delete('/api/posts/:id', async (req, res) => {
+app.delete('/api/posts/:id', auth, async (req, res) => {
   try {
     const result = await Post.deleteOne({ _id: req.params.id });
     if (result.deletedCount === 0) {
@@ -157,7 +161,7 @@ app.delete('/api/posts/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/trips/:tripId', async (req, res) => {
+app.delete('/api/trips/:tripId', auth, async (req, res) => {
   try {
     const result = await Trip.deleteOne({ _id: req.params.tripId });
     if (result.deletedCount === 0) {
@@ -169,7 +173,7 @@ app.delete('/api/trips/:tripId', async (req, res) => {
   }
 });
 
-app.get('/api/posts/:id', async (req, res) => {
+app.get('/api/posts/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (post) {
@@ -192,7 +196,7 @@ app.get('/api/posts/:id', async (req, res) => {
   }
 });
 
-app.get('/api/trips/:id', async (req, res) => {
+app.get('/api/trips/:id', auth, async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
     if (trip) {
@@ -213,7 +217,7 @@ app.get('/api/trips/:id', async (req, res) => {
   }
 });
 
-app.put('/api/posts/:id', upload.single('image'), async (req, res) => {
+app.put('/api/posts/:id', auth, upload.single('image'), async (req, res) => {
   try {
     let imagePath = req.body.image;
 
@@ -244,7 +248,7 @@ app.put('/api/posts/:id', upload.single('image'), async (req, res) => {
   }
 });
 
-app.put('/api/trips/:id', upload.single('coverPhoto'), async (req, res) => {
+app.put('/api/trips/:id', auth, upload.single('coverPhoto'), async (req, res) => {
   try {
     let imagePath = req.body.coverPhoto;
 
@@ -276,6 +280,14 @@ app.put('/api/trips/:id', upload.single('coverPhoto'), async (req, res) => {
   }
 });
 
+function generateToken(user) {
+  return jwt.sign(
+    { userId: user._id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '15d' }
+  );
+}
+
 app.post('/api/users', upload.none(), async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -287,8 +299,13 @@ app.post('/api/users', upload.none(), async (req, res) => {
     });
 
     const savedUser = await user.save();
-    res.status(201).json({ message: 'Signup successfull', user: savedUser });
+    const token = generateToken(savedUser);
+    res.status(201).json({ message: 'Signup successfull', user: savedUser, token });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'Email already registered' });
+    }
+    console.error('Signup failed:', error.message);
     res.status(500).json({ message: 'Signup failed', error });
   }
 });
@@ -303,9 +320,67 @@ app.post('/api/login', upload.none(), async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ message: 'Incorrect password' });
 
-    res.status(200).json({ message: 'Login successful', user });
+    const token = generateToken(user);
+    res.status(200).json({ message: 'Login successful', user, token });
   } catch (error) {
     res.status(500).json({ message: 'Login failed', error });
+  }
+});
+
+app.post('/api/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ message: 'Email not found' });
+
+    // Generate a random token; email the raw value but store only its hash.
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4300';
+    const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+
+    const previewUrl = await sendResetEmail(user.email, resetUrl);
+
+    res.status(200).json({ message: 'Password reset link sent', previewUrl });
+  } catch (error) {
+    console.error('Forgot-password failed:', error.message);
+    res.status(500).json({ message: 'Failed to process request', error });
+  }
+});
+
+app.post('/api/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Reset link is invalid or has expired' });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Reset-password failed:', error.message);
+    res.status(500).json({ message: 'Failed to reset password', error });
   }
 });
 

@@ -33,6 +33,10 @@ export class SignupComponent implements OnInit {
     signupData.append('email', this.email);
     signupData.append('password', this.password)
     this.postsService.saveSignupData(signupData).subscribe((res) => {
+      const token = (res as any)?.token;
+      if (token) {
+        this.postsService.setToken(token);
+      }
       const signedUpUserId = (res.user as any)?._id;
       if(signedUpUserId) {
         this.postsService.setUserId(signedUpUserId);
@@ -44,7 +48,8 @@ export class SignupComponent implements OnInit {
       this.toastrService.success('Signup successfull', 'Success');
       this.router.navigate(['/trips']);
     }, (err) => {
-      this.toastrService.error('Signup failed', 'Error');
+      const message = err?.error?.message || 'Signup failed';
+      this.toastrService.error(message, 'Error');
     });
   }
 

@@ -37,6 +37,10 @@ export class LoginComponent implements OnInit {
     loginData.append('password', this.password);
     this.postsService.saveLoginData(loginData).subscribe((res) => {
       console.log('response in login component', res)
+      const token = (res as any)?.token;
+      if (token) {
+        this.postsService.setToken(token);
+      }
       const loggedInUserId = (res.user as any)?._id;
       if (loggedInUserId) {
         this.postsService.setUserId(loggedInUserId);

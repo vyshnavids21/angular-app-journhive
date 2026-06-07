@@ -35,6 +35,8 @@ export class PostsService {
     private postApiUrl = `${this.baseUrl}/api/posts`;
     private userApiUrl = `${this.baseUrl}/api/users`; //signup api
     private loginApiUrl = `${this.baseUrl}/api/login`;
+    private forgotPasswordApiUrl = `${this.baseUrl}/api/forgot-password`;
+    private resetPasswordApiUrl = `${this.baseUrl}/api/reset-password`;
     private userIdSubject = new BehaviorSubject<string | null>(null);
     private userEmailSubject = new BehaviorSubject<string | null>(null);
 
@@ -114,6 +116,36 @@ export class PostsService {
 
     getLoginData(): Observable<{message: string, users: loginData[]}> {
         return this.http.get<{message: string, users: loginData[]}>(this.loginApiUrl);
+    }
+
+    forgotPassword(email: string): Observable<{ message: string, previewUrl?: string }> {
+        return this.http.post<{ message: string, previewUrl?: string }>(this.forgotPasswordApiUrl, { email });
+    }
+
+    resetPassword(token: string, password: string): Observable<{ message: string }> {
+        return this.http.post<{ message: string }>(this.resetPasswordApiUrl, { token, password });
+    }
+
+    setToken(token: string | null) {
+        if (token) {
+            localStorage.setItem('token', token);
+        } else {
+            localStorage.removeItem('token');
+        }
+    }
+
+    getToken(): string | null {
+        return localStorage.getItem('token');
+    }
+
+    isLoggedIn(): boolean {
+        return !!this.getToken();
+    }
+
+    logout() {
+        this.setToken(null);
+        this.setUserId(null);
+        this.setUserEmail(null);
     }
 
     setUserId(userId: string | null) {

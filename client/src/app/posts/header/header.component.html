@@ -7,10 +7,9 @@
     </div>
 
   <div class="left-section">
-    <div class="brand">
-      <img src="assets/images/journhive-applogo.png" class="brand-logo" alt="logo" />
-      <div class="app-title"><a routerLink="/trips" class="brand-name">JournHive</a></div>
-    </div>
+    <a routerLink="/trips" class="brand">
+      <span class="app-title"><span class="brand-name"><span class="brand-journ">Journ</span><span class="brand-hive">Hive</span></span></span>
+    </a>
   </div>
 
   <div class="right-section">
@@ -30,9 +29,28 @@
 
   <div class="user-menu" *ngIf="showUserMenu">
     <div class="user-info">
-      <mat-icon>person</mat-icon>
-      <span class="user-name">{{ userEmailId }}</span>
+      <div class="user-avatar">
+        <mat-icon>person</mat-icon>
+      </div>
+      <div class="user-details">
+        <span class="user-label">Signed in as</span>
+        <span class="user-name">{{ userEmailId }}</span>
+      </div>
     </div>
+
+    <div class="menu-divider"></div>
+
+    <button class="menu-action mobile-action" mat-button (click)="navigateToCreate(); toggleUserMenu()">
+      <mat-icon>add</mat-icon>
+      {{ buttonLabel }}
+    </button>
+
+    <button *ngIf="showDownloadButton()" class="menu-action mobile-action" mat-button (click)="onDownloadPosts(); toggleUserMenu()">
+      <mat-icon>download</mat-icon>
+      Download
+    </button>
+
+    <div class="menu-divider mobile-action"></div>
 
     <button class="logout-button" mat-button color="warn" (click)="logout()">
       <mat-icon>logout</mat-icon>

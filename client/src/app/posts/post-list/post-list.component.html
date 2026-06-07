@@ -68,7 +68,17 @@
 
     <ng-template #noPosts>
       <div class="no-post">
-        <p class="no-post-text">No posts found. Create your first one!</p>
+        <div class="no-post-card">
+          <div class="no-post-icon">
+            <mat-icon>travel_explore</mat-icon>
+          </div>
+          <h2 class="no-post-title">No posts yet</h2>
+          <p class="no-post-subtitle">Start capturing this trip — add your first post and bring the journey to life.</p>
+          <button mat-button class="no-post-cta" [routerLink]="['/create-post', tripId]">
+            <mat-icon>add</mat-icon>
+            Add your first post
+          </button>
+        </div>
       </div>
     </ng-template>
 

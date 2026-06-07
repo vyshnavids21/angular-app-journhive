@@ -1,15 +1,71 @@
 @import "~ngx-toastr/toastr.css";
 
-html, body { 
+:root {
+    /* Typography — Inter, a clean professional sans for headings and body */
+    --font-display: 'Inter', 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    --font-body: 'Inter', 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+
+    /* Blue + green on white palette */
+    --teal-900: #0A2C5E; /* deepest blue — header, dark surfaces */
+    --teal-800: #103E7E; /* blue — primary ink / brand / titles */
+    --teal-600: #1E5FC0; /* interactive blue */
+    --coral: #22C55E;    /* green — accent / CTAs */
+    --coral-600: #16A34A;/* green hover */
+    --amber: #4ADE80;    /* light green — secondary highlight */
+    --cream: #FFFFFF;    /* white — surfaces / backgrounds */
+    --sand: #E8EEF6;     /* light blue-gray — soft fills / borders */
+    --ink: #16243D;      /* deep blue-gray — body text */
+    --ink-soft: #5A6B86; /* muted blue-gray text */
+
+    /* Legacy aliases (kept so existing component rules stay in-palette) */
+    --navy: #103E7E;
+    --navy-2: #0A2C5E;
+    --blue: #103E7E;
+    --blue-600: #22C55E;
+
+    --grad-brand: linear-gradient(135deg, #0A2C5E 0%, #1E5FC0 100%);
+    --grad-accent: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
+
+    --elev-1:
+        0 1px 2px rgba(16, 62, 126, 0.04),
+        0 4px 10px rgba(16, 62, 126, 0.06);
+    --elev-2:
+        0 1px 2px rgba(16, 62, 126, 0.05),
+        0 8px 20px rgba(16, 62, 126, 0.08),
+        0 18px 44px rgba(16, 62, 126, 0.10);
+    --elev-3:
+        0 2px 6px rgba(16, 62, 126, 0.06),
+        0 16px 34px rgba(16, 62, 126, 0.14),
+        0 30px 64px rgba(16, 62, 126, 0.18);
+    --hairline: 1px solid rgba(16, 62, 126, 0.07);
+    --inner-light: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
-    background: linear-gradient(145deg, #cadcfc, #8ab6f9) !important;
+    background: #ffffff !important;
     overflow: hidden;
 }
 
-body { 
+body {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0.1px;
+    color: var(--ink);
+}
+
+h1, h2, h3, h4, .display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--teal-800);
+}
+
+body {
     margin: 0px!important;
 }
 
@@ -18,7 +74,7 @@ app-root, .main {
     flex-direction: column;
     height: 100vh;
     width: 100vw;
-    background: linear-gradient(145deg, #cadcfc, #8ab6f9);
+    background: #ffffff;
     border-radius: 0 !important;
     margin: 0 !important;
     padding: 0;
@@ -26,11 +82,11 @@ app-root, .main {
   }
 
 .mat-form-field-underline {
-  background-color: #347cb8 !important;
+  background-color: #22C55E !important;
 }
 
 .mat-form-field-ripple {
-  background-color: #3b6ab2 !important;
+  background-color: #22C55E !important;
 }
 
 .mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline {
@@ -84,41 +140,87 @@ app-root, .main {
 
 .mat-paginator {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  padding: 10px 16px;
-  background-color: #f5f5f5;
-  color: #3859eb;
-  margin-bottom: 50px;
+  width: 100%;
+  padding: 4px 32px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  color: #103E7E;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  border-top: 1px solid rgba(16, 62, 126, 0.14);
+  box-shadow: 0 -6px 22px rgba(16, 62, 126, 0.07);
   font-weight: 500;
   font-size: 13px;
+  flex-shrink: 0;
 }
 
 .mat-paginator-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 35px;
-  padding: 0 16px;
+  justify-content: flex-end;
+  min-height: 52px;
+  width: 100%;
+  padding: 0;
   flex-wrap: wrap;
+  gap: 4px;
 }
 
 .mat-paginator-page-size {
   display: flex;
   align-items: center;
-  margin-right: 16px;
+  margin-right: 20px;
+  padding: 4px 12px;
+  background: rgba(16, 62, 126, 0.06);
+  border-radius: 12px;
+}
+
+.mat-paginator-page-size-label {
+  margin-right: 10px;
+  color: #5a6478;
+  font-weight: 500;
+}
+
+.mat-paginator-page-size .mat-paginator-page-size-select {
+  margin: 0 4px;
+  width: auto;
+  min-width: 56px;
 }
 
 .mat-paginator-range-actions {
   display: flex;
   align-items: center;
+  gap: 2px;
 }
 
-.mat-paginator-page-size-label {
-  margin-right: 8px;
+.mat-paginator-range-label {
+  margin: 0 16px;
+  color: #5a6478;
+  font-weight: 500;
+}
+
+.mat-paginator .mat-icon-button {
+  border-radius: 50%;
+  color: #103E7E;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+
+  &:hover:not([disabled]) {
+    background-color: rgba(16, 62, 126, 0.12);
+    transform: translateY(-1px);
+  }
+
+  &[disabled] {
+    color: rgba(16, 62, 126, 0.28);
+  }
 }
 
 .mat-select-value {
-  color: #3859eb !important;
-  font-weight: 500;
+  color: #103E7E !important;
+  font-weight: 600;
+}
+
+.mat-paginator .mat-select-arrow {
+  color: #103E7E;
 }

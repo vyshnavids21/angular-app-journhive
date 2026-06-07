@@ -25,8 +25,8 @@ export class PostListComponent implements OnInit, OnDestroy {
   @ViewChild('postListSection') postListSection!: ElementRef;
 
   totalPosts = 0;
-  pageSize = 12;
-  pageSizeOptions = [12, 24, 36, 48];
+  pageSize = 10;
+  pageSizeOptions = [10, 20, 30, 50];
   filteredPageSizeOptions: number[] = [];
   currentPage = 0;
   paginatedPosts: Post[] = [];
@@ -44,7 +44,7 @@ export class PostListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
-      const name = params.get('tripName');   //showing destination name in download pdf file name
+      const name = params.get('tripName');  
       if (name) {
         this.tripName = name.toLowerCase()
           .replace(/[^\w\s-]/g, '')
@@ -98,7 +98,7 @@ export class PostListComponent implements OnInit, OnDestroy {
       showCancelButton: true,
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'Cancel',
-      confirmButtonColor: '#4a6cf7',
+      confirmButtonColor: '#0a1c38',
       cancelButtonColor: '#f28b82'
     }).then((result) => {
       if (result.isConfirmed) {
@@ -174,36 +174,45 @@ export class PostListComponent implements OnInit, OnDestroy {
     const colWidth = (pageWidth - margin * 3) / 2;
     const imageHeight = 35;
     const lineHeight = 4;
+    const titleLineHeight = 5;
     const bottomPadding = 6;
   
     let y = margin;
-  
+
+    // Destination heading at the top of the document 
+    const heading = (this.tripName && this.tripName !== "unknown-trip")
+      ? this.tripName.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+      : "My Trip";
+    pdf.setFontSize(22);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(10, 28, 56); 
+    pdf.text(heading, pageWidth / 2, y + 6, { align: "center" });
+    y += 18;
+
+    const computeHeight = (post: any) => {
+      if (!post) return 0;
+      pdf.setFontSize(12);
+      const titleLines = pdf.splitTextToSize(post.title || "Untitled", colWidth - 10).length;
+      pdf.setFontSize(10);
+      const captionLines = pdf.splitTextToSize(post.caption || "", colWidth - 10).length;
+      return imageHeight + 20 + titleLines * titleLineHeight + captionLines * lineHeight + bottomPadding + 10;
+    };
+
+    let cardHeight = 0;
+    for (const post of this.postListArray) {
+      cardHeight = Math.max(cardHeight, computeHeight(post));
+    }
+
     for (let i = 0; i < this.postListArray.length; i += 2) {
       const leftPost = this.postListArray[i];
       const rightPost = this.postListArray[i + 1];
-  
-      const computeHeight = async (post: any) => {
-        if (!post) return 0;
-        let imgData: string | undefined;
-        if (post.image instanceof File) imgData = await this.convertToBase64(post.image);
-        else if (typeof post.image === "string") imgData = post.image;
-        const caption = post.caption || "";
-        const wrapped = pdf.splitTextToSize(caption, colWidth - 10);
-        const captionHeight = wrapped.length * lineHeight;
-        return imageHeight + 30 + captionHeight + bottomPadding + 10;
-      };
-  
-      const leftHeight = await computeHeight(leftPost);
-      const rightHeight = await computeHeight(rightPost);
-  
-      const rowHeight = Math.max(leftHeight, rightHeight);
-  
-      if (y + rowHeight > pageHeight - margin) {
+
+      if (y + cardHeight > pageHeight - margin) {
         pdf.addPage();
         y = margin;
       }
-  
-      const drawCard = async (post: any, x: number, cardHeight: number) => {
+
+      const drawCard = async (post: any, x: number) => {
         if (!post) return;
   
         let imgData: string | undefined;
@@ -226,13 +235,21 @@ export class PostListComponent implements OnInit, OnDestroy {
   
         pdf.setFontSize(12);
         pdf.setFont("helvetica", "bold");
-        pdf.text(post.title || "Untitled", x + 5, y + imageHeight + 15);
+        pdf.setTextColor(10, 28, 56); 
+        const wrappedTitle = pdf.splitTextToSize(post.title || "Untitled", colWidth - 10);
+        let titleY = y + imageHeight + 12;
+        wrappedTitle.forEach((line: string) => {
+          pdf.text(line, x + 5, titleY);
+          titleY += titleLineHeight;
+        });
   
         const caption = post.caption || "";
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(0, 0, 0);
         const wrapped = pdf.splitTextToSize(caption, colWidth - 10);
   
         pdf.setFontSize(10);
-        let captionY = y + imageHeight + 25;
+        let captionY = titleY + 4;
   
         wrapped.forEach((line: string) => {
           pdf.text(line, x + 5, captionY);
@@ -246,10 +263,10 @@ export class PostListComponent implements OnInit, OnDestroy {
         }
       };
   
-      await drawCard(leftPost, margin, leftHeight);
-      await drawCard(rightPost, margin * 2 + colWidth, rightHeight);
-  
-      y += rowHeight + margin;
+      await drawCard(leftPost, margin);
+      await drawCard(rightPost, margin * 2 + colWidth);
+
+      y += cardHeight + margin;
     }
   
     pdf.save(`posts-${this.tripName}.pdf`);

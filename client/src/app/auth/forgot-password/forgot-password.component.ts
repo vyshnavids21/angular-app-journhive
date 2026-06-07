@@ -1,5 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
+import { PostsService } from '../../services/posts.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-forgot-password',
@@ -11,10 +13,9 @@ export class ForgotPasswordComponent {
   email: string = '';
   validEmail: boolean | null = null;
   emailNotFound: boolean = false;
+  loading: boolean = false;
 
-  registeredEmails: string[] = [];
-
-  constructor(private router: Router) {}
+  constructor(private router: Router, private postsService: PostsService, private toastrService: ToastrService) {}
 
   validateEmail() {
     const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
@@ -27,13 +28,34 @@ export class ForgotPasswordComponent {
   }
 
   onSubmit() {
-    if (!this.registeredEmails.includes(this.email)) {
-      this.emailNotFound = true;
+    this.validateEmail();
+    if (!this.validEmail || this.loading) {
       return;
     }
 
-    alert(`Password reset link sent to ${this.email}`);
-    this.navigateToLogin();
+    this.loading = true;
+    this.emailNotFound = false;
+
+    this.postsService.forgotPassword(this.email).subscribe({
+      next: (res) => {
+        this.loading = false;
+        // In local dev (no real SMTP configured) the server returns an Ethereal
+        // preview URL — log it so the reset link can be opened without a real inbox.
+        if (res?.previewUrl) {
+          console.log('Password reset email preview:', res.previewUrl);
+        }
+        this.toastrService.success(`Password reset link sent to ${this.email}`, 'Success');
+        this.navigateToLogin();
+      },
+      error: (err) => {
+        this.loading = false;
+        if (err.status === 404) {
+          this.emailNotFound = true;
+        } else {
+          this.toastrService.error('Something went wrong. Please try again later.', 'Error');
+        }
+      }
+    });
   }
 
   navigateToLogin() {

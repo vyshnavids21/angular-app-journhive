@@ -1,0 +1,8 @@
+# Database backups contain real user data — never commit them
+backups/
+
+# Local environment / secrets
+.env
+.env.local
+
+node_modules/

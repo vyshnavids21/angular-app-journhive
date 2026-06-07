@@ -3,8 +3,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
-import { HttpClientModule } from '@angular/common/http'; 
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
+import { AuthInterceptor } from './auth/auth.interceptor';
 
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,6 +32,7 @@ import { SignupComponent } from './auth/signup/signup.component';
 import { TripDashboardComponent } from './trip-dashboard/trip-dashboard.component';
 import { TripCreateComponent } from './trip-create/trip-create.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
 
 @NgModule({
@@ -45,6 +47,7 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
     TripDashboardComponent,
     TripCreateComponent,
     ForgotPasswordComponent,
+    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,
@@ -73,7 +76,9 @@ import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.
     MatNativeDateModule,
     MatDatepickerModule
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
