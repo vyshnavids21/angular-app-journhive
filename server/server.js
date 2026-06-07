@@ -42,12 +42,15 @@ mongoose.connect(process.env.MONGO_URI, {
   .then(() => console.log("Connected to database"))
   .catch(err => console.error("Db connection failed:", err.message));
 
+const allowedOrigins = [
+  'http://localhost:4300',
+  'https://journhive.vercel.app',
+  'https://journhive-33.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    'http://localhost:4300',
-    'https://journhive-7ium39e99-vyshnavi-dss-projects.vercel.app',
-    'https://journhive-33.vercel.app'
-  ],
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
