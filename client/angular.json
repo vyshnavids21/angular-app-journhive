@@ -23,6 +23,13 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "rgbcolor",
+              "raf",
+              "core-js",
+              "sweetalert2"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets"
@@ -47,12 +54,6 @@
                   "maximumWarning": "2mb",
                   "maximumError": "5mb"
                 }
-              ],
-              "allowedCommonJsDependencies": [
-                "canvg",
-                "rgbcolor",
-                "raf",
-                "core-js"
               ],
               "fileReplacements": [
                 {
