@@ -85,6 +85,8 @@ $font: 'Inter', 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
     flex-direction: column;
     justify-content: center;
     position: relative;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 .brand-mark {
