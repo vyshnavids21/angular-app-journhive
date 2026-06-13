@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐝 JournHive
+# JournHive
 
 ### Your travels, beautifully journaled.
 
@@ -13,30 +13,30 @@ JournHive is a full-stack travel journaling platform where wanderers capture tri
 [![Cloudinary](https://img.shields.io/badge/Cloudinary-Media-3448C5?logo=cloudinary&logoColor=white)](https://cloudinary.com/)
 [![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
 
-**[🌐 Live Demo](https://journhive-33.vercel.app)** · [Highlights](#-highlights) · [Tech Stack](#-tech-stack) · [API](#-api-reference)
+**[Live Demo](https://journhive-33.vercel.app)** · [Highlights](#highlights) · [Tech Stack](#tech-stack) · [API](#api-reference)
 
 </div>
 
 ---
 
-## ✨ Overview
+## Overview
 
 JournHive turns scattered travel memories into a structured, shareable journal. Users create a **trip**, populate it with captioned **journal entries** and photos, and export the result as a clean **PDF keepsake** — all behind secure, token-based authentication.
 
 It's built as a production-style two-tier application with a clear separation between an **Angular SPA** and a **stateless REST API**, deployed across **Vercel** (frontend) and **Render** (backend) with **MongoDB Atlas** and **Cloudinary** as managed services.
 
-## 🎯 Highlights
+## Highlights
 
 What this project demonstrates from an engineering standpoint:
 
-- 🔐 **Secure authentication** — JWT-based sessions, `bcrypt`-hashed passwords, and route guards on both the client (Angular `AuthGuard` + HTTP interceptor) and server (Express middleware).
-- 📧 **Real-world password recovery** — hashed, time-limited reset tokens with a pluggable email layer that gracefully falls back across **Gmail SMTP → Resend → Ethereal** depending on what's configured.
-- ☁️ **Cloud media pipeline** — direct image uploads to Cloudinary via `multer` storage, keeping the API stateless and deploy-friendly.
-- 📄 **Client-side PDF generation** — journal entries exported to PDF in-browser with `jsPDF`.
-- 🧱 **Clean RESTful API** — resource-oriented endpoints for users, trips, and posts with consistent status codes and error handling.
-- 🚀 **Cloud-native deployment** — independently deployed frontend and backend wired together through environment-based configuration and a CORS allowlist.
+- **Secure authentication** — JWT-based sessions, `bcrypt`-hashed passwords, and route guards on both the client (Angular `AuthGuard` + HTTP interceptor) and server (Express middleware).
+- **Real-world password recovery** — hashed, time-limited reset tokens with a pluggable email layer that gracefully falls back across **Gmail SMTP → Resend → Ethereal** depending on what's configured.
+- **Cloud media pipeline** — direct image uploads to Cloudinary via `multer` storage, keeping the API stateless and deploy-friendly.
+- **Client-side PDF generation** — journal entries exported to PDF in-browser with `jsPDF`.
+- **Clean RESTful API** — resource-oriented endpoints for users, trips, and posts with consistent status codes and error handling.
+- **Cloud-native deployment** — independently deployed frontend and backend wired together through environment-based configuration and a CORS allowlist.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer | Technologies |
 | ----- | ------------ |
@@ -48,7 +48,7 @@ What this project demonstrates from an engineering standpoint:
 | **Email** | Nodemailer (SMTP / Ethereal) · Resend |
 | **Deployment** | Vercel (client) · Render (API) |
 
-## 🏗 Architecture
+## Architecture
 
 ```
 ┌─────────────────┐        REST / JWT         ┌──────────────────┐
@@ -81,7 +81,7 @@ journhive/
     └── server.js               # app entry point & routes
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -132,7 +132,7 @@ npm run dev     # nodemon with auto-reload
 npm start       # plain node
 ```
 
-> 💡 With no email provider configured, reset emails route to a free [Ethereal](https://ethereal.email) inbox and a preview URL is printed to the console — zero setup required for local dev.
+> With no email provider configured, reset emails route to a free [Ethereal](https://ethereal.email) inbox and a preview URL is printed to the console — zero setup required for local dev.
 
 The API listens on `http://localhost:3200`.
 
@@ -147,9 +147,9 @@ npm start       # ng serve
 The app runs at `http://localhost:4200`. The API base URL lives in
 `client/src/environments/environment.ts` (local) and `environment.prod.ts` (production).
 
-## 📡 API Reference
+## API Reference
 
-All routes are prefixed with `/api`. Routes marked 🔒 require an `Authorization: Bearer <token>` header.
+All routes are prefixed with `/api`. Routes marked with a lock require an `Authorization: Bearer <token>` header.
 
 | Method | Endpoint | Description |
 | ------ | -------- | ----------- |
@@ -157,19 +157,19 @@ All routes are prefixed with `/api`. Routes marked 🔒 require an `Authorizatio
 | `POST` | `/api/login` | Log in |
 | `POST` | `/api/forgot-password` | Request a password-reset email |
 | `POST` | `/api/reset-password` | Set a new password using a token |
-| `POST` | `/api/trips` 🔒 | Create a trip |
-| `GET` | `/api/trips/creator/:id` 🔒 | List a user's trips |
-| `GET` | `/api/trips/:id` 🔒 | Get a trip |
-| `PUT` | `/api/trips/:id` 🔒 | Update a trip |
-| `DELETE` | `/api/trips/:tripId` 🔒 | Delete a trip |
-| `POST` | `/api/posts` 🔒 | Create a post |
-| `GET` | `/api/posts/creator/:id` 🔒 | List a user's posts |
-| `GET` | `/api/posts/trip/:tripId` 🔒 | List posts for a trip |
-| `GET` | `/api/posts/:id` 🔒 | Get a post |
-| `PUT` | `/api/posts/:id` 🔒 | Update a post |
-| `DELETE` | `/api/posts/:id` 🔒 | Delete a post |
+| `POST` | `/api/trips` (auth) | Create a trip |
+| `GET` | `/api/trips/creator/:id` (auth) | List a user's trips |
+| `GET` | `/api/trips/:id` (auth) | Get a trip |
+| `PUT` | `/api/trips/:id` (auth) | Update a trip |
+| `DELETE` | `/api/trips/:tripId` (auth) | Delete a trip |
+| `POST` | `/api/posts` (auth) | Create a post |
+| `GET` | `/api/posts/creator/:id` (auth) | List a user's posts |
+| `GET` | `/api/posts/trip/:tripId` (auth) | List posts for a trip |
+| `GET` | `/api/posts/:id` (auth) | Get a post |
+| `PUT` | `/api/posts/:id` (auth) | Update a post |
+| `DELETE` | `/api/posts/:id` (auth) | Delete a post |
 
-## 📜 Scripts
+## Scripts
 
 **Server** (`server/`)
 
@@ -188,7 +188,7 @@ All routes are prefixed with `/api`. Routes marked 🔒 require an `Authorizatio
 | `npm run build` | Production build |
 | `npm test` | Run unit tests (Karma / Jasmine) |
 
-## ☁️ Deployment
+## Deployment
 
 - **Frontend** → Vercel (`client/vercel.json`)
 - **Backend** → Render — the production client targets `https://journhive-server.onrender.com`
@@ -197,6 +197,6 @@ All routes are prefixed with `/api`. Routes marked 🔒 require an `Authorizatio
 
 <div align="center">
 
-Built with ☕ and a love for travel.
+Built with care and a love for travel.
 
 </div>
